@@ -18,11 +18,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 @Slf4j
 @Configuration
 @ConditionalOnClass(Exporter.class)
-@EnableConfigurationProperties({DubboApplication.class, DubboProtocol.class, DubboRegistry.class, DubboProvider.class})
-public class DubboConfiguration {
+@EnableConfigurationProperties(
+        {
+                DubboApplication.class,
+                DubboProtocol.class,
+                DubboRegistry.class,
+                DubboProvider.class
+        }
+)
+public class DubboAutoConfiguration {
 
     @Autowired
     private DubboApplication dubboApplication;
@@ -38,29 +46,28 @@ public class DubboConfiguration {
 
     @Bean
     public static AnnotationBean annotationBean(@Value("${dubbo.annotation.package}") String packageName) {
-        log.debug("[DubboAutoConfiguration] AnnotationBean:{}", packageName);
         AnnotationBean annotationBean = new AnnotationBean();
         annotationBean.setPackage(packageName);
+        log.debug("[DubboAutoConfiguration] {}", packageName);
         return annotationBean;
     }
 
     @Bean
     public ApplicationConfig applicationConfig() {
-        log.debug("[DubboAutoConfiguration] ApplicationConfig:{}", dubboApplication);
         ApplicationConfig applicationConfig = new ApplicationConfig();
         applicationConfig.setName(dubboApplication.getName());
         applicationConfig.setLogger(dubboApplication.getLogger());
+        log.debug("[DubboAutoConfiguration] {}", dubboApplication);
         return applicationConfig;
     }
 
     @Bean
     public ProtocolConfig protocolConfig() {
-        log.debug("[DubboAutoConfiguration] ProtocolConfig:{}", dubboProtocol);
         ProtocolConfig protocolConfig = new ProtocolConfig();
         protocolConfig.setName(dubboProtocol.getName());
         protocolConfig.setPort(dubboProtocol.getPort());
         protocolConfig.setAccesslog(String.valueOf(dubboProtocol.isAccessLog()));
-
+        log.debug("[DubboAutoConfiguration] {}", dubboProtocol);
         return protocolConfig;
     }
 
@@ -68,31 +75,25 @@ public class DubboConfiguration {
     public ProviderConfig providerConfig(ApplicationConfig applicationConfig,
                                          RegistryConfig registryConfig,
                                          ProtocolConfig protocolConfig) {
-        log.debug("[DubboAutoConfiguration] ProviderConfig:{}", dubboProvider);
-
         ProviderConfig providerConfig = new ProviderConfig();
-
         providerConfig.setTimeout(dubboProvider.getTimeout());
         providerConfig.setRetries(dubboProvider.getRetries());
         providerConfig.setDelay(dubboProvider.getDelay());
-
         providerConfig.setApplication(applicationConfig);
         providerConfig.setRegistry(registryConfig);
         providerConfig.setProtocol(protocolConfig);
-
+        log.debug("[DubboAutoConfiguration] {}", dubboProvider);
         return providerConfig;
     }
 
     @Bean
     public RegistryConfig registryConfig() {
-        log.debug("[DubboAutoConfiguration] RegistryConfig:{}", dubboRegistry);
-
         RegistryConfig registryConfig = new RegistryConfig();
-
         registryConfig.setProtocol(dubboRegistry.getProtocol());
         registryConfig.setAddress(dubboRegistry.getAddress());
         registryConfig.setRegister(dubboRegistry.isRegister());
         registryConfig.setSubscribe(dubboRegistry.isSubscribe());
+        log.debug("[DubboAutoConfiguration] {}", dubboRegistry);
         return registryConfig;
     }
 }
